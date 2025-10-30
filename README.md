@@ -1,4 +1,4 @@
-# ExpenseSplitter.Cli
+# ExpenseSplitter
 
 ## Description
 ExpenseSplitter helps groups track shared expenses and compute fair settlements. It includes a CLI for quick usage and a Web app for a richer UI.
