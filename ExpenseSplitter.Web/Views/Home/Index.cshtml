@@ -1,0 +1,17 @@
+@{
+    Layout = "/Pages/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Dashboard";
+}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="display-6 mb-3">Expense Splitter</h1>
+            <p class="text-muted mb-3">Welcome! MVC is configured and the app runs in guest mode (no login). Use Trips to create a trip, add members by email, and add expenses via the wizard.</p>
+            <div class="d-flex gap-2">
+                <a class="btn btn-primary" href="@Url.Action("Index", "Trips")">Go to Trips</a>
+                <a class="btn btn-outline-primary" href="@Url.Action("Create", "Trips")">Create a Trip</a>
+            </div>
+        </div>
+    </div>
+    
+</div>

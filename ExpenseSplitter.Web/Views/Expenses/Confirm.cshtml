@@ -1,0 +1,113 @@
+@model ExpenseSplitter.Web.Models.ViewModels.ExpenseStep3Vm
+@{
+    Layout = "/Pages/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Add Expense - Confirm";
+}
+<div class="container py-4">
+    <h2 class="mb-3">Add Expense - Step 3: Confirm</h2>
+
+    <div class="card mb-3">
+        <div class="card-body">
+            <div class="row g-2">
+                <div class="col-md-4">
+                    <div class="text-muted small">Title</div>
+                    <div class="fw-semibold">@Model.Title</div>
+                </div>
+                <div class="col-md-2">
+                    <div class="text-muted small">Amount</div>
+                    <div class="fw-semibold">@Model.TotalAmount</div>
+                </div>
+                <div class="col-md-2">
+                    <div class="text-muted small">Category</div>
+                    <div class="fw-semibold">@Model.Category</div>
+                </div>
+                <div class="col-md-2">
+                    <div class="text-muted small">Date</div>
+                    <div class="fw-semibold">@Model.ExpenseDate:d</div>
+                </div>
+                <div class="col-md-2">
+                    <div class="text-muted small">Paid By</div>
+                    <div class="fw-semibold">@Model.PaidBy</div>
+                </div>
+            </div>
+            @if (!string.IsNullOrWhiteSpace(Model.Description))
+            {
+                <div class="mt-2 text-muted">@Model.Description</div>
+            }
+        </div>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-body">
+            <h5 class="card-title">Split Summary</h5>
+            <div id="splitSummary"></div>
+        </div>
+    </div>
+
+    <form asp-action="Confirm" method="post">
+        <input type="hidden" asp-for="TripId" />
+        <input type="hidden" asp-for="Title" />
+        <input type="hidden" asp-for="TotalAmount" />
+        <input type="hidden" asp-for="Category" />
+        <input type="hidden" name="ExpenseDate" value="@Model.ExpenseDate.ToString("yyyy-MM-dd")" />
+        <input type="hidden" asp-for="Description" />
+        <input type="hidden" asp-for="PaidBy" />
+        <input type="hidden" asp-for="SplitMethod" />
+        @{ var _selected = Model.SelectedUserIds ?? new List<string>(); }
+        @for (int i = 0; i < _selected.Count; i++)
+        {
+            <input type="hidden" name="SelectedUserIds[@i]" value="@_selected[i]" />
+        }
+
+        @{ var _customs = Model.CustomSplits ?? new List<ExpenseSplitter.Web.Models.ViewModels.MemberOption>(); }
+        @for (int i = 0; i < _customs.Count; i++)
+        {
+            <input type="hidden" name="CustomSplits[@i].UserId" value="@_customs[i].UserId" />
+            <input type="hidden" name="CustomSplits[@i].Display" value="@_customs[i].Display" />
+            <input type="hidden" name="CustomSplits[@i].CustomAmount" value="@_customs[i].CustomAmount" />
+        }
+
+        <div class="form-check mb-3">
+            <input class="form-check-input" asp-for="IsSettled" />
+            <label class="form-check-label" asp-for="IsSettled">Mark as Settled</label>
+        </div>
+
+        <div class="d-flex gap-2">
+            <a class="btn btn-secondary" href="@Url.Action("Split", new { TripId = Model.TripId, Title = Model.Title, TotalAmount = Model.TotalAmount, Category = Model.Category, ExpenseDate = Model.ExpenseDate.ToString("yyyy-MM-dd"), Description = Model.Description, PaidBy = Model.PaidBy })">Back</a>
+            <button class="btn btn-success" type="submit">Save Expense</button>
+        </div>
+    </form>
+</div>
+@section Scripts {
+<script>
+(function(){
+    const total = @Model.TotalAmount;
+    const method = '@Model.SplitMethod';
+    const members = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Members));
+    const selected = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.SelectedUserIds ?? new List<string>()));
+    const custom = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.CustomSplits ?? new List<ExpenseSplitter.Web.Models.ViewModels.MemberOption>()));
+
+    function render(){
+        let rows = [];
+        if(method === 'EqualAll'){
+            const each = (total / members.length);
+            rows = members.map(m=>({display: m.Display, amount: each}));
+        } else if(method === 'EqualSelected'){
+            const sel = members.filter(m=> selected.indexOf(m.UserId) >= 0);
+            const arr = sel.length ? sel : members;
+            const each = (total / arr.length);
+            rows = arr.map(m=>({display: m.Display, amount: each}));
+        } else {
+            rows = custom.map(c=>({display: c.Display, amount: c.CustomAmount || 0}));
+        }
+        const el = document.getElementById('splitSummary');
+        const html = ['<div class="table-responsive"><table class="table"><thead><tr><th>Member</th><th>Amount</th></tr></thead><tbody>',
+            ...rows.map(r=>`<tr><td>${r.display}</td><td>${r.amount.toFixed(2)}</td></tr>`),
+            '</tbody></table></div>'
+        ].join('');
+        el.innerHTML = html;
+    }
+    render();
+})();
+</script>
+}

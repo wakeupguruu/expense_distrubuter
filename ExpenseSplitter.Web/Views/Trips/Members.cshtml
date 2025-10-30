@@ -1,0 +1,77 @@
+@model ExpenseSplitter.Web.Models.Trip
+@{
+    Layout = "/Pages/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Members";
+}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="mb-0">Members - @Model.TripName</h2>
+        <a class="btn btn-outline-secondary" href="@Url.Action("Details", "Trips", new { id = Model.TripId })">Back</a>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-body">
+            <form asp-action="AddMember" method="post" class="row g-3 align-items-end">
+                <input type="hidden" name="tripId" value="@Model.TripId" />
+                <div class="col-md-6">
+                    <label class="form-label">Member Email</label>
+                    <input type="email" name="email" class="form-control" placeholder="user@example.com" required />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Personal Budget</label>
+                    <input type="number" step="0.01" min="0" name="personalBudget" class="form-control" value="0" />
+                </div>
+                <div class="col-md-3">
+                    <button class="btn btn-primary w-100" type="submit">Add Member</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Current Members</h5>
+            @if (!Model.Members.Any())
+            {
+                <div class="alert alert-info mb-0">No members yet.</div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead>
+                            <tr>
+                                <th>Member</th>
+                                <th>Personal Budget</th>
+                                <th>Current Balance</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var m in Model.Members)
+                        {
+                            <tr>
+                                <td class="small">@((ViewBag.UserDisplay as Dictionary<string, string>)[m.UserId])</td>
+                                <td style="width:260px">
+                                    <form asp-action="UpdateBudget" method="post" class="d-flex gap-2">
+                                        <input type="hidden" name="tripMemberId" value="@m.TripMemberId" />
+                                        <input type="number" step="0.01" min="0" name="personalBudget" class="form-control" value="@m.PersonalBudget" />
+                                        <button class="btn btn-sm btn-outline-primary" type="submit">Save</button>
+                                    </form>
+                                </td>
+                                <td>@m.CurrentBalance</td>
+                                <td class="text-end">
+                                    <form asp-action="RemoveMember" method="post" onsubmit="return confirm('Remove member?');">
+                                        <input type="hidden" name="tripMemberId" value="@m.TripMemberId" />
+                                        <button class="btn btn-sm btn-outline-danger" type="submit">Remove</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>

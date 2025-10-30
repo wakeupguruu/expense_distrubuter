@@ -1,0 +1,131 @@
+@page
+@model ExpenseSplitter.Web.Pages.ExpensesModel
+@{
+    ViewData["Title"] = "Expenses";
+}
+
+<div class="container py-4">
+    <h2 class="mb-3">Expenses</h2>
+    <a asp-page="/Index">← Back</a>
+
+    @if (TempData["Msg"] is string msg)
+    {
+        <div class="alert alert-success mt-2">@msg</div>
+    }
+    @if (TempData["Warn"] is string warn)
+    {
+        <div class="alert alert-warning mt-2">@warn</div>
+    }
+    @if (!ViewContext.ModelState.IsValid)
+    {
+        <div class="alert alert-danger mt-2">
+            <ul class="mb-0">
+                @foreach (var e in ViewContext.ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    <li>@e.ErrorMessage</li>
+                }
+            </ul>
+        </div>
+    }
+
+    <div class="card mb-4">
+        <div class="card-header">Add Expense</div>
+        <div class="card-body">
+            <form method="post">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Description</label>
+                        <input asp-for="Description" class="form-control" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Amount</label>
+                        <input asp-for="Amount" class="form-control" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Payer</label>
+                        <select asp-for="PayerId" class="form-select">
+                            @foreach (var m in Model.Members)
+                            {
+                                <option value="@m.Id">@m.Name</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Split Mode</label>
+                        <select asp-for="SplitMode" class="form-select">
+                            <option value="EqualAll">Equal among all</option>
+                            <option value="EqualSelected">Equal among selected</option>
+                            <option value="CustomSelected">Custom for selected</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mt-3">
+                    <label class="form-label">Participants</label>
+                    <div class="row row-cols-1 row-cols-md-3 g-2">
+                        @for (int i = 0; i < Model.Members.Count; i++)
+                        {
+                            var m = Model.Members[i];
+                            <div class="col">
+                                <div class="border rounded p-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="SelectedIds" value="@m.Id" id="member_@i">
+                                        <label class="form-check-label" for="member_@i">@m.Name</label>
+                                    </div>
+                                    <div class="mt-2">
+                                        <input class="form-control" name="CustomAmounts[@m.Id]" placeholder="Custom amount (for CustomSelected)" />
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <div class="mt-3 d-flex gap-2">
+                    <button class="btn btn-primary" type="submit">Add Expense</button>
+                    <a asp-page="/Balances" class="btn btn-outline-secondary">Go to Balances</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">Existing Expenses</div>
+        <div class="card-body">
+            @if (Model.Expenses.Count == 0)
+            {
+                <div>No expenses yet.</div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Description</th>
+                            <th>Payer</th>
+                            <th>Amount</th>
+                            <th>Split</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var e in Model.Expenses)
+                        {
+                            <tr>
+                                <td>@e.Date.ToString("g")</td>
+                                <td>@e.Description</td>
+                                <td>@e.Payer.Name</td>
+                                <td>@e.Amount.ToString("0.00")</td>
+                                <td>
+                                    @string.Join(", ", e.Splits.Select(s => $"{s.Participant.Name}:{s.Amount:0.00}"))
+                                </td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>

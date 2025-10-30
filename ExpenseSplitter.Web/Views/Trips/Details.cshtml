@@ -1,0 +1,77 @@
+@model ExpenseSplitter.Web.Models.Trip
+@{
+    Layout = "/Pages/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Trip Details";
+}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="mb-0">@Model.TripName</h2>
+        <div class="d-flex gap-2">
+            <a class="btn btn-outline-primary" href="@Url.Action("Members", "Trips", new { id = Model.TripId })">Members</a>
+            <a class="btn btn-primary" href="@Url.Action("Create", "Expenses", new { tripId = Model.TripId })">Add Expense</a>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card shadow-sm"><div class="card-body">
+                <div class="text-muted small">Total Budget</div>
+                <div class="fs-5 fw-semibold">@Model.TotalBudget</div>
+            </div></div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm"><div class="card-body">
+                <div class="text-muted small">Dates</div>
+                <div class="fs-6">@Model.StartDate:d – @Model.EndDate:d</div>
+            </div></div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm"><div class="card-body">
+                <div class="text-muted small">Status</div>
+                <span class="badge @(Model.IsActive ? "bg-success" : "bg-secondary")">@(Model.IsActive ? "Active" : "Closed")</span>
+            </div></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title mb-3">Recent Expenses</h5>
+            @if (!Model.Expenses.Any())
+            {
+                <div class="alert alert-info mb-0">No expenses yet. Add one to get started.</div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Date</th>
+                                <th>Category</th>
+                                <th>Total</th>
+                                <th>Paid By</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var e in Model.Expenses.OrderByDescending(x => x.ExpenseDate).Take(10))
+                        {
+                            <tr>
+                                <td>@e.Title</td>
+                                <td>@e.ExpenseDate:d</td>
+                                <td>@e.Category</td>
+                                <td>@e.TotalAmount</td>
+                                <td class="small">@((ViewBag.UserDisplay as Dictionary<string, string>)[e.PaidBy])</td>
+                                <td>
+                                    <span class="badge @(e.IsSettled ? "bg-success" : "bg-warning text-dark")">@(e.IsSettled ? "Settled" : "Pending")</span>
+                                </td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>

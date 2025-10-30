@@ -1,0 +1,48 @@
+@page
+@model ExpenseSplitter.Web.Pages.BalancesModel
+@{
+    ViewData["Title"] = "Balances";
+}
+
+<div class="container py-4">
+    <h2 class="mb-3">Balances & Settlement</h2>
+    <a asp-page="/Index">← Back</a>
+
+    <div class="card mb-3 mt-2">
+        <div class="card-header">Balances (negative => they are owed, positive => they owe)</div>
+        <div class="card-body">
+            @if (Model.Members.Count == 0)
+            {
+                <div>No members yet.</div>
+            }
+            else
+            {
+                <ul>
+                    @foreach (var m in Model.Members)
+                    {
+                        <li>@m.Name: @m.Balance.ToString("+0.00;-0.00;0.00")</li>
+                    }
+                </ul>
+            }
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">Suggested Transfers</div>
+        <div class="card-body">
+            @if (Model.Settlements.Count == 0)
+            {
+                <div>All settled.</div>
+            }
+            else
+            {
+                <ul>
+                    @foreach (var s in Model.Settlements)
+                    {
+                        <li>@s.From pays @s.To @s.Amount.ToString("0.00")</li>
+                    }
+                </ul>
+            }
+        </div>
+    </div>
+</div>

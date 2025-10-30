@@ -1,0 +1,52 @@
+@model ExpenseSplitter.Web.Models.ViewModels.ExpenseStep1Vm
+@{
+    Layout = "/Pages/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Add Expense - Step 1";
+}
+<div class="container py-4">
+    <h2 class="mb-3">Add Expense - Step 1: Basic Info</h2>
+    <form asp-action="Create" method="post">
+        <div asp-validation-summary="All" class="text-danger mb-2"></div>
+        <input type="hidden" asp-for="TripId" />
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label asp-for="Title" class="form-label"></label>
+                <input asp-for="Title" class="form-control" />
+                <span asp-validation-for="Title" class="text-danger"></span>
+            </div>
+            <div class="col-md-3">
+                <label asp-for="TotalAmount" class="form-label"></label>
+                <input asp-for="TotalAmount" class="form-control" />
+                <span asp-validation-for="TotalAmount" class="text-danger"></span>
+            </div>
+            <div class="col-md-3">
+                <label asp-for="Category" class="form-label"></label>
+                <select asp-for="Category" class="form-select" asp-items="Html.GetEnumSelectList<ExpenseSplitter.Web.Models.ExpenseCategory>()"></select>
+            </div>
+            <div class="col-md-3">
+                <label asp-for="ExpenseDate" class="form-label"></label>
+                <input asp-for="ExpenseDate" type="date" class="form-control" />
+            </div>
+            <div class="col-md-9">
+                <label asp-for="Description" class="form-label"></label>
+                <textarea asp-for="Description" class="form-control" rows="2"></textarea>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Paid By</label>
+                <select asp-for="PaidBy" class="form-select">
+                    @foreach (var m in Model.Members)
+                    {
+                        <option value="@m.UserId">@m.Display</option>
+                    }
+                </select>
+            </div>
+        </div>
+        <div class="mt-4 d-flex gap-2">
+            <a class="btn btn-secondary" href="@Url.Action("Details", "Trips", new { id = Model.TripId })">Cancel</a>
+            <button class="btn btn-primary" type="submit">Next</button>
+        </div>
+    </form>
+</div>
+@section Scripts {
+    <partial name="/Pages/Shared/_ValidationScriptsPartial.cshtml" />
+}
