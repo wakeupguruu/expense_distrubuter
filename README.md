@@ -13,6 +13,5 @@ Command-line tool to split and track shared expenses.
 ## Build
 ```bash
 dotnet build
-
 ## Run
 dotnet run --project ExpenseSplitter.Cli -- [args]
